@@ -13,69 +13,47 @@ body {
     height: 100vh;
 }
 
-.container {
+.game-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 900px;
+}
+
+canvas {
+    background-color: #78aaff;
+    border: 2px solid #000;
+}
+
+.controls {
+    padding: 20px;
     text-align: center;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.1);
-    width: 300px;
-}
-
-h1 {
-    color: #333;
-}
-
-.settings {
-    margin-bottom: 20px;
-}
-
-.settings input {
-    padding: 5px;
-    width: 50px;
-}
-
-.info {
-    margin-bottom: 20px;
+    margin-left: 20px;
     font-size: 18px;
-    text-align: left;
 }
 
-.info p {
-    margin: 5px 0;
-}
-
-.action {
-    margin: 20px 0;
-}
-
-.btn {
+button {
     padding: 10px 20px;
     font-size: 16px;
     margin: 10px;
     cursor: pointer;
     border: none;
-    border-radius: 5px;
     background-color: #28a745;
     color: white;
+    border-radius: 5px;
     transition: background-color 0.3s;
 }
 
-.btn:hover {
+button:hover {
     background-color: #218838;
-}
-
-.result {
-    font-size: 18px;
-    color: #333;
-    font-weight: bold;
 }
 
 .hidden {
     display: none;
 }
 
-#result {
-    font-size: 20px;
-    color: #007bff;
+#scoreboard {
+    font-size: 18px;
+    margin-top: 20px;
+    text-align: left;
 }
