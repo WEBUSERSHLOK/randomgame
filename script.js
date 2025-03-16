@@ -1,110 +1,71 @@
-const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+let overs = 0;
+let score = 0;
+let balls = 0;
+let wickets = 0;
+let currentPlayer = 1;
 
-        const gridSize = 20; // size of grid cells
-        let snake = [{x: 9 * gridSize, y: 9 * gridSize}]; // initial snake position
-        let food = {x: 5 * gridSize, y: 5 * gridSize}; // initial food position
-        let dx = gridSize; // initial horizontal direction
-        let dy = 0; // initial vertical direction
-        let score = 0;
+const maxOvers = 5; // Set max overs
+const maxWickets = 3; // Set max wickets
 
-        function gameLoop() {
-            updateSnakePosition();
-            if (checkCollisions()) {
-                alert('Game Over! Your score: ' + score);
-                resetGame();
-            } else {
-                clearCanvas();
-                drawFood();
-                drawSnake();
-                updateScore();
-                moveSnake();
-                setTimeout(gameLoop, 100); // keep the game running
+const bowlBtn = document.getElementById('bowlBtn');
+const hitBtn = document.getElementById('hitBtn');
+const result = document.getElementById('result');
+const scoreDisplay = document.getElementById('score');
+const ballsDisplay = document.getElementById('balls');
+const wicketsDisplay = document.getElementById('wickets');
+const oversDisplay = document.getElementById('overs');
+const currentPlayerDisplay = document.getElementById('currentPlayer');
+
+bowlBtn.addEventListener('click', bowlBall);
+hitBtn.addEventListener('click', hitBall);
+
+function bowlBall() {
+    if (balls < maxOvers * 6 && wickets < maxWickets) {
+        const randomBallOutcome = Math.floor(Math.random() * 6); // Random outcome between 0 to 5 (no runs to 5 runs)
+        balls++;
+        updateGameInfo();
+
+        if (randomBallOutcome === 0) {
+            wickets++;
+            result.textContent = `Wicket! Player ${currentPlayer} is out!`;
+            result.style.color = 'red';
+            currentPlayer++;
+            if (currentPlayer > 2) {
+                currentPlayer = 1;
             }
+        } else {
+            score += randomBallOutcome;
+            result.textContent = `Player ${currentPlayer} hit ${randomBallOutcome} runs!`;
+            result.style.color = '#007bff';
         }
+    } else {
+        result.textContent = `Game Over! Final Score: ${score} runs, ${wickets} wickets`;
+        result.style.color = '#dc3545';
+        bowlBtn.disabled = true;
+        hitBtn.disabled = true;
+    }
+}
 
-        function clearCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+function hitBall() {
+    if (balls < maxOvers * 6 && wickets < maxWickets) {
+        const randomHitOutcome = Math.floor(Math.random() * 6); // Random hit outcome (runs 0 to 5)
+        score += randomHitOutcome;
+        balls++;
+        updateGameInfo();
+        result.textContent = `Player ${currentPlayer} hit ${randomHitOutcome} runs!`;
+        result.style.color = '#007bff';
+    } else {
+        result.textContent = `Game Over! Final Score: ${score} runs, ${wickets} wickets`;
+        result.style.color = '#dc3545';
+        bowlBtn.disabled = true;
+        hitBtn.disabled = true;
+    }
+}
 
-        function drawSnake() {
-            ctx.fillStyle = 'green';
-            snake.forEach((segment) => {
-                ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
-            });
-        }
-
-        function moveSnake() {
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-            snake.unshift(head);
-
-            if (head.x === food.x && head.y === food.y) {
-                score++;
-                generateNewFood();
-            } else {
-                snake.pop();
-            }
-        }
-
-        function generateNewFood() {
-            food.x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
-            food.y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
-        }
-
-        function drawFood() {
-            ctx.fillStyle = 'red';
-            ctx.fillRect(food.x, food.y, gridSize, gridSize);
-        }
-
-        function updateScore() {
-            ctx.fillStyle = 'black';
-            ctx.font = '16px Arial';
-            ctx.fillText('Score: ' + score, 10, 20);
-        }
-
-        function checkCollisions() {
-            const head = snake[0];
-            // Check wall collisions
-            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
-                return true;
-            }
-            // Check self-collision
-            for (let i = 1; i < snake.length; i++) {
-                if (snake[i].x === head.x && snake[i].y === head.y) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function updateSnakePosition() {
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'ArrowUp' && dy === 0) {
-                    dx = 0;
-                    dy = -gridSize;
-                } else if (event.key === 'ArrowDown' && dy === 0) {
-                    dx = 0;
-                    dy = gridSize;
-                } else if (event.key === 'ArrowLeft' && dx === 0) {
-                    dx = -gridSize;
-                    dy = 0;
-                } else if (event.key === 'ArrowRight' && dx === 0) {
-                    dx = gridSize;
-                    dy = 0;
-                }
-            });
-        }
-
-        function resetGame() {
-            snake = [{x: 9 * gridSize, y: 9 * gridSize}];
-            food = {x: 5 * gridSize, y: 5 * gridSize};
-            dx = gridSize;
-            dy = 0;
-            score = 0;
-            gameLoop();
-        }
-
-        gameLoop(); // Start the game
-    </script>
-</body>
-</html>
+function updateGameInfo() {
+    scoreDisplay.textContent = score;
+    ballsDisplay.textContent = balls;
+    wicketsDisplay.textContent = wickets;
+    oversDisplay.textContent = Math.floor(balls / 6);
+    currentPlayerDisplay.textContent = `Player ${currentPlayer}`;
+}
