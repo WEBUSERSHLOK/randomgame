@@ -1,181 +1,118 @@
-const canvas = document.getElementById("cricketCanvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = 800;
-canvas.height = 400;
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 500;
+canvas.height = 250;
 
 let score = 0;
 let balls = 0;
 let wickets = 0;
-let overs = 0;
-let currentPlayer = 1;
-let isBatting = false;
-let isGameOver = false;
-let maxOvers = 5;
-let bowlerX = 100; // Bowler's starting X position
-let bowlerY = 300; // Bowler's starting Y position
+let isBatting = true;
+let ballPosition = { x: 0, y: 150, dx: 2, dy: 0 }; // Ball starting position
 
-// Elements
-const startBtn = document.getElementById("startBtn");
-const batBtn = document.getElementById("batBtn");
-const bowlBtn = document.getElementById("bowlBtn");
-const hitBtn = document.getElementById("hitBtn");
-const gameStatus = document.getElementById("gameStatus");
-const scoreDisplay = document.getElementById("score");
-const ballsDisplay = document.getElementById("balls");
-const wicketsDisplay = document.getElementById("wickets");
-const oversDisplay = document.getElementById("overs");
+const hitBtn = document.getElementById('hitBtn');
+const resetBtn = document.getElementById('resetBtn');
+const scoreboard = document.getElementById('scoreboard');
+const message = document.getElementById('message');
+const gameMessage = document.getElementById('gameMessage');
 
-// Start Game
-startBtn.addEventListener("click", () => {
-    maxOvers = 5; // Reset max overs
-    score = 0;
-    balls = 0;
-    wickets = 0;
-    isGameOver = false;
-    gameStatus.textContent = "Select your role!";
-    startBtn.disabled = true;
-    batBtn.classList.remove("hidden");
-    bowlBtn.classList.remove("hidden");
-});
-
-// Batting Mode
-batBtn.addEventListener("click", () => {
-    isBatting = true;
-    gameStatus.textContent = `You are batting!`;
-    batBtn.classList.add("hidden");
-    bowlBtn.classList.add("hidden");
-    hitBtn.classList.remove("hidden");
-});
-
-// Bowling Mode
-bowlBtn.addEventListener("click", () => {
-    isBatting = false;
-    gameStatus.textContent = `You are bowling!`;
-    batBtn.classList.add("hidden");
-    bowlBtn.classList.add("hidden");
-    // Simulate bowling run-up and delivery
-    setTimeout(() => {
-        bowlBall();
-    }, 1000);
-});
-
-// Batting Logic
-hitBtn.addEventListener("click", () => {
-    if (balls < maxOvers * 6 && wickets < 3) {
-        const runs = Math.floor(Math.random() * 7); // Runs between 0-6
-        score += runs;
-        balls++;
-        updateGameInfo();
-        gameStatus.textContent = `Player ${currentPlayer} hit ${runs} runs!`;
-
-        if (runs === 0) {
-            wickets++;
-            gameStatus.textContent = `Player ${currentPlayer} is out!`;
-            currentPlayer++;
-            if (currentPlayer > 2) {
-                currentPlayer = 1;
-            }
-        }
-    } else {
-        endGame();
-    }
-});
-
-// Bowling Simulation
-function bowlBall() {
-    if (balls < maxOvers * 6 && wickets < 3) {
-        // Animation for Bowler's Run-Up
-        bowlerRunUp();
-    }
+// Draw the field
+function drawField() {
+    ctx.fillStyle = '#76c7c0';
+    ctx.fillRect(0, 0, canvas.width, canvas.height); // Field color
 }
 
-// Bowler's Run-Up Animation
-function bowlerRunUp() {
-    let runUpInterval = setInterval(() => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawField();
-        drawBowler(bowlerX, bowlerY);
-
-        if (bowlerX > canvas.width / 2) {
-            clearInterval(runUpInterval);
-            bowlDelivery();
-        } else {
-            bowlerX += 2;
-        }
-    }, 50);
+// Draw the batter
+function drawBatter() {
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillRect(230, 220, 40, 10); // Bat
+    ctx.fillRect(240, 200, 20, 20); // Body
 }
 
-// Bowl Delivery
-function bowlDelivery() {
-    let ballX = bowlerX;
-    let ballY = bowlerY - 10;
-
-    // Simulate Ball Movement
-    let deliveryInterval = setInterval(() => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawField();
-        drawBowler(bowlerX, bowlerY);
-
-        ballX += 5;
-        if (ballX > canvas.width) {
-            clearInterval(deliveryInterval);
-            checkBatterShot();
-        }
-        drawBall(ballX, ballY);
-    }, 50);
-}
-
-// Draw Bowler
-function drawBowler(x, y) {
-    ctx.fillStyle = "blue";
-    ctx.fillRect(x, y, 20, 40); // Bowler (rectangular)
-}
-
-// Draw Ball
-function drawBall(x, y) {
-    ctx.fillStyle = "red";
+// Draw the ball
+function drawBall() {
+    ctx.fillStyle = '#ff0000';
     ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.arc(ballPosition.x, ballPosition.y, 5, 0, Math.PI * 2);
     ctx.fill();
 }
 
-// Draw Field
-function drawField() {
-    ctx.fillStyle = "green";
-    ctx.fillRect(0, 0, canvas.width, canvas.height); // Field
+// Simulate bowling action
+function bowlBall() {
+    if (ballPosition.x > canvas.width) {
+        ballPosition.x = 0;
+        ballPosition.y = Math.random() * 200 + 50; // Randomize y position of the ball
+        ballPosition.dx = 2 + Math.random() * 3; // Randomize ball speed
+        balls++;
+        updateScoreboard();
+        checkOut();
+    }
+
+    ballPosition.x += ballPosition.dx;
+    ballPosition.y += ballPosition.dy;
 }
 
-// Check Batter's Shot (Random outcome)
-function checkBatterShot() {
-    const runs = Math.floor(Math.random() * 7); // Runs 0-6
-    if (runs === 0) {
-        wickets++;
-        gameStatus.textContent = `Batter is out!`;
-    } else {
+// Check if the batter is out
+function checkOut() {
+    if (ballPosition.x >= 230 && ballPosition.x <= 270 && ballPosition.y >= 220) {
+        let runs = Math.floor(Math.random() * 7); // Random runs (0 to 6)
         score += runs;
-        gameStatus.textContent = `Batter scored ${runs} runs!`;
-    }
 
-    balls++;
-    updateGameInfo();
-    if (balls >= maxOvers * 6 || wickets >= 3) {
-        endGame();
+        if (runs === 0) {
+            wickets++;
+            if (wickets === 3 || balls === 6) {
+                endGame();
+            }
+        }
     }
 }
 
-// Update Game Info
-function updateGameInfo() {
-    scoreDisplay.textContent = score;
-    ballsDisplay.textContent = balls;
-    wicketsDisplay.textContent = wickets;
-    oversDisplay.textContent = Math.floor(balls / 6);
+// Update the scoreboard
+function updateScoreboard() {
+    scoreboard.innerHTML = `Score: ${score} | Balls: ${balls} | Wickets: ${wickets}`;
 }
 
-// End Game
+// End the game
 function endGame() {
-    isGameOver = true;
-    gameStatus.textContent = `Game Over! Final Score: ${score}, Wickets: ${wickets}`;
-    startBtn.disabled = false;
-    startBtn.textContent = "Play Again";
+    gameMessage.innerHTML = `Game Over! Final Score: ${score}`;
+    message.style.display = 'block';
+    hitBtn.disabled = true;
+    resetBtn.classList.remove('hidden');
 }
+
+// Reset the game
+resetBtn.addEventListener('click', () => {
+    score = 0;
+    balls = 0;
+    wickets = 0;
+    ballPosition.x = 0;
+    ballPosition.y = 150;
+    ballPosition.dx = 2;
+    hitBtn.disabled = false;
+    message.style.display = 'none';
+    resetBtn.classList.add('hidden');
+    updateScoreboard();
+    gameLoop();
+});
+
+// Batting action on hitting the ball
+hitBtn.addEventListener('click', () => {
+    bowlBall();
+    ballPosition.x = 0;
+    ballPosition.y = Math.random() * 200 + 50;
+    ballPosition.dx = 2 + Math.random() * 3;
+});
+
+// Game loop
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawField();
+    drawBatter();
+    drawBall();
+    bowlBall();
+
+    if (wickets < 3 && balls < 6) {
+        requestAnimationFrame(gameLoop);
+    }
+}
+
+gameLoop();

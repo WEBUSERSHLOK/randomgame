@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Cricket Simulator</title>
+    <title>Cricket Game</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="game-container">
-        <canvas id="cricketCanvas"></canvas>
-        <div class="controls">
-            <button id="startBtn">Start Game</button>
-            <button id="batBtn" class="hidden">Bat</button>
-            <button id="bowlBtn" class="hidden">Bowl</button>
-            <button id="hitBtn" class="hidden">Hit!</button>
-            <p id="gameStatus">Select your role to start!</p>
+        <div class="game-header">
+            <h1>Cricket Game</h1>
             <div id="scoreboard">
-                <p>Score: <span id="score">0</span></p>
-                <p>Wickets: <span id="wickets">0</span></p>
-                <p>Balls: <span id="balls">0</span></p>
-                <p>Overs: <span id="overs">0</span></p>
+                <p>Score: <span id="score">0</span> | Balls: <span id="balls">0</span> | Wickets: <span id="wickets">0</span></p>
             </div>
         </div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="controls">
+            <button id="hitBtn">Hit</button>
+            <button id="resetBtn" class="hidden">Reset Game</button>
+        </div>
+        <div id="message" class="hidden">
+            <p id="gameMessage">You're out! Game Over!</p>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
