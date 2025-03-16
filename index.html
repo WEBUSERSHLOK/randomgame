@@ -3,14 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
+    <title>Cricket Simulator</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Snake Game</h1>
-    <div id="scoreBoard">Score: <span id="score">0</span> | High Score: <span id="highScore">0</span></div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <p id="gameOverMessage" class="game-over" style="display:none;">Game Over! Press Space to Play Again</p>
+    <div class="container">
+        <h1>Cricket Simulator Game</h1>
+        <div class="game">
+            <div class="info">
+                <p>Overs: <span id="overs">0</span></p>
+                <p>Score: <span id="score">0</span></p>
+                <p>Balls: <span id="balls">0</span></p>
+                <p>Wickets: <span id="wickets">0</span></p>
+                <p>Current Player: <span id="currentPlayer">Player 1</span></p>
+            </div>
+            <div class="action">
+                <button id="bowlBtn" class="btn">Bowl</button>
+                <button id="hitBtn" class="btn">Hit</button>
+            </div>
+            <div class="result">
+                <p id="result">Awaiting action...</p>
+            </div>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
