@@ -1,97 +1,110 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-let car = { x: 175, y: 500, width: 50, height: 80, speed: 5 };
-let obstacles = [];
-let gameSpeed = 3;
-let score = 0;
-let highScore = localStorage.getItem("highScore") || 0;
-let keys = {};
-let gameOver = false;
+        const gridSize = 20; // size of grid cells
+        let snake = [{x: 9 * gridSize, y: 9 * gridSize}]; // initial snake position
+        let food = {x: 5 * gridSize, y: 5 * gridSize}; // initial food position
+        let dx = gridSize; // initial horizontal direction
+        let dy = 0; // initial vertical direction
+        let score = 0;
 
-document.getElementById("highScore").textContent = highScore;
-document.addEventListener("keydown", (e) => keys[e.key] = true);
-document.addEventListener("keyup", (e) => keys[e.key] = false);
-document.addEventListener("keydown", (e) => {
-    if (e.key === " " && gameOver) restartGame();
-});
-
-function drawCar() {
-    ctx.fillStyle = "red";
-    ctx.fillRect(car.x, car.y, car.width, car.height);
-}
-
-function createObstacle() {
-    let x = Math.random() * (canvas.width - 50);
-    obstacles.push({ x, y: -50, width: 50, height: 50 });
-}
-
-function moveObstacles() {
-    for (let obs of obstacles) {
-        obs.y += gameSpeed;
-    }
-    obstacles = obstacles.filter(obs => obs.y < canvas.height);
-}
-
-function checkCollision() {
-    for (let obs of obstacles) {
-        if (car.x < obs.x + obs.width &&
-            car.x + car.width > obs.x &&
-            car.y < obs.y + obs.height &&
-            car.y + car.height > obs.y) {
-            endGame();
+        function gameLoop() {
+            updateSnakePosition();
+            if (checkCollisions()) {
+                alert('Game Over! Your score: ' + score);
+                resetGame();
+            } else {
+                clearCanvas();
+                drawFood();
+                drawSnake();
+                updateScore();
+                moveSnake();
+                setTimeout(gameLoop, 100); // keep the game running
+            }
         }
-    }
-}
 
-function update() {
-    if (gameOver) return;
-    if (keys["ArrowLeft"] && car.x > 0) car.x -= car.speed;
-    if (keys["ArrowRight"] && car.x < canvas.width - car.width) car.x += car.speed;
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
 
-    if (Math.random() < 0.02) createObstacle();
-    moveObstacles();
-    checkCollision();
+        function drawSnake() {
+            ctx.fillStyle = 'green';
+            snake.forEach((segment) => {
+                ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
+            });
+        }
 
-    gameSpeed += 0.002;
-    score++;
-    document.getElementById("score").textContent = score;
-}
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            snake.unshift(head);
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawCar();
-    ctx.fillStyle = "blue";
-    for (let obs of obstacles) {
-        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-    }
-}
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                generateNewFood();
+            } else {
+                snake.pop();
+            }
+        }
 
-function gameLoop() {
-    update();
-    draw();
-    if (!gameOver) requestAnimationFrame(gameLoop);
-}
+        function generateNewFood() {
+            food.x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
+            food.y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
+        }
 
-function endGame() {
-    gameOver = true;
-    document.getElementById("gameOverMessage").style.display = "block";
-    if (score > highScore) {
-        highScore = score;
-        localStorage.setItem("highScore", highScore);
-        document.getElementById("highScore").textContent = highScore;
-    }
-}
+        function drawFood() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x, food.y, gridSize, gridSize);
+        }
 
-function restartGame() {
-    gameOver = false;
-    score = 0;
-    gameSpeed = 3;
-    obstacles = [];
-    car.x = 175;
-    document.getElementById("score").textContent = score;
-    document.getElementById("gameOverMessage").style.display = "none";
-    gameLoop();
-}
+        function updateScore() {
+            ctx.fillStyle = 'black';
+            ctx.font = '16px Arial';
+            ctx.fillText('Score: ' + score, 10, 20);
+        }
 
-gameLoop();
+        function checkCollisions() {
+            const head = snake[0];
+            // Check wall collisions
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                return true;
+            }
+            // Check self-collision
+            for (let i = 1; i < snake.length; i++) {
+                if (snake[i].x === head.x && snake[i].y === head.y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updateSnakePosition() {
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'ArrowUp' && dy === 0) {
+                    dx = 0;
+                    dy = -gridSize;
+                } else if (event.key === 'ArrowDown' && dy === 0) {
+                    dx = 0;
+                    dy = gridSize;
+                } else if (event.key === 'ArrowLeft' && dx === 0) {
+                    dx = -gridSize;
+                    dy = 0;
+                } else if (event.key === 'ArrowRight' && dx === 0) {
+                    dx = gridSize;
+                    dy = 0;
+                }
+            });
+        }
+
+        function resetGame() {
+            snake = [{x: 9 * gridSize, y: 9 * gridSize}];
+            food = {x: 5 * gridSize, y: 5 * gridSize};
+            dx = gridSize;
+            dy = 0;
+            score = 0;
+            gameLoop();
+        }
+
+        gameLoop(); // Start the game
+    </script>
+</body>
+</html>
