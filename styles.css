@@ -1,17 +1,17 @@
 body {
     text-align: center;
-    background: #111;
+    background: #222;
     color: white;
     font-family: Arial, sans-serif;
 }
 
 h1 {
     font-size: 28px;
-    text-shadow: 2px 2px 5px #ff0000;
+    text-shadow: 2px 2px 5px green;
 }
 
 canvas {
-    background: linear-gradient(#444, #111);
+    background: black;
     display: block;
     margin: auto;
     border: 4px solid white;
