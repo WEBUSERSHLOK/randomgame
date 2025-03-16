@@ -3,11 +3,18 @@ const ctx = canvas.getContext("2d");
 
 let car = { x: 175, y: 500, width: 50, height: 80, speed: 5 };
 let obstacles = [];
-let gameSpeed = 2;
+let gameSpeed = 3;
+let score = 0;
+let highScore = localStorage.getItem("highScore") || 0;
 let keys = {};
+let gameOver = false;
 
+document.getElementById("highScore").textContent = highScore;
 document.addEventListener("keydown", (e) => keys[e.key] = true);
 document.addEventListener("keyup", (e) => keys[e.key] = false);
+document.addEventListener("keydown", (e) => {
+    if (e.key === " " && gameOver) restartGame();
+});
 
 function drawCar() {
     ctx.fillStyle = "red";
@@ -32,13 +39,13 @@ function checkCollision() {
             car.x + car.width > obs.x &&
             car.y < obs.y + obs.height &&
             car.y + car.height > obs.y) {
-            alert("Game Over!");
-            document.location.reload();
+            endGame();
         }
     }
 }
 
 function update() {
+    if (gameOver) return;
     if (keys["ArrowLeft"] && car.x > 0) car.x -= car.speed;
     if (keys["ArrowRight"] && car.x < canvas.width - car.width) car.x += car.speed;
 
@@ -46,7 +53,9 @@ function update() {
     moveObstacles();
     checkCollision();
 
-    gameSpeed += 0.001;
+    gameSpeed += 0.002;
+    score++;
+    document.getElementById("score").textContent = score;
 }
 
 function draw() {
@@ -61,7 +70,28 @@ function draw() {
 function gameLoop() {
     update();
     draw();
-    requestAnimationFrame(gameLoop);
+    if (!gameOver) requestAnimationFrame(gameLoop);
+}
+
+function endGame() {
+    gameOver = true;
+    document.getElementById("gameOverMessage").style.display = "block";
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+        document.getElementById("highScore").textContent = highScore;
+    }
+}
+
+function restartGame() {
+    gameOver = false;
+    score = 0;
+    gameSpeed = 3;
+    obstacles = [];
+    car.x = 175;
+    document.getElementById("score").textContent = score;
+    document.getElementById("gameOverMessage").style.display = "none";
+    gameLoop();
 }
 
 gameLoop();
