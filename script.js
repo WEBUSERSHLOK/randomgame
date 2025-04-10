@@ -1,118 +1,84 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = 500;
-canvas.height = 250;
+const teams = [
+  "India", "Australia", "England", "Pakistan", "New Zealand",
+  "South Africa", "Sri Lanka", "Bangladesh", "Afghanistan", "Netherlands"
+];
 
-let score = 0;
-let balls = 0;
-let wickets = 0;
-let isBatting = true;
-let ballPosition = { x: 0, y: 150, dx: 2, dy: 0 }; // Ball starting position
+let selectedTeam = "";
+let customizedPlayers = [];
 
-const hitBtn = document.getElementById('hitBtn');
-const resetBtn = document.getElementById('resetBtn');
-const scoreboard = document.getElementById('scoreboard');
-const message = document.getElementById('message');
-const gameMessage = document.getElementById('gameMessage');
-
-// Draw the field
-function drawField() {
-    ctx.fillStyle = '#76c7c0';
-    ctx.fillRect(0, 0, canvas.width, canvas.height); // Field color
+function goToTeamSelection() {
+  toggleScreen("team-selection");
+  const teamSelect = document.getElementById("team-select");
+  teamSelect.innerHTML = "";
+  teams.forEach(team => {
+    const option = document.createElement("option");
+    option.value = team;
+    option.textContent = team;
+    teamSelect.appendChild(option);
+  });
 }
 
-// Draw the batter
-function drawBatter() {
-    ctx.fillStyle = '#ffcc00';
-    ctx.fillRect(230, 220, 40, 10); // Bat
-    ctx.fillRect(240, 200, 20, 20); // Body
+function customizeTeam() {
+  selectedTeam = document.getElementById("team-select").value;
+  toggleScreen("customize-team");
+  const form = document.getElementById("team-form");
+  form.innerHTML = "";
+  for (let i = 1; i <= 11; i++) {
+    form.innerHTML += `
+      <label>Player ${i}:</label>
+      <input type="text" placeholder="Name" id="name${i}" required />
+      <select id="hand${i}">
+        <option value="RHB">RHB</option>
+        <option value="LHB">LHB</option>
+      </select>
+      <input type="number" placeholder="Number" id="num${i}" required />
+    `;
+  }
 }
 
-// Draw the ball
-function drawBall() {
-    ctx.fillStyle = '#ff0000';
-    ctx.beginPath();
-    ctx.arc(ballPosition.x, ballPosition.y, 5, 0, Math.PI * 2);
-    ctx.fill();
+function startSimulation() {
+  customizedPlayers = [];
+  for (let i = 1; i <= 11; i++) {
+    const name = document.getElementById(`name${i}`).value || `Player ${i}`;
+    const hand = document.getElementById(`hand${i}`).value;
+    const number = document.getElementById(`num${i}`).value || i;
+    customizedPlayers.push({ name, hand, number });
+  }
+  toggleScreen("match-screen");
+  document.getElementById("match-title").textContent = `Simulating match for ${selectedTeam}`;
 }
 
-// Simulate bowling action
-function bowlBall() {
-    if (ballPosition.x > canvas.width) {
-        ballPosition.x = 0;
-        ballPosition.y = Math.random() * 200 + 50; // Randomize y position of the ball
-        ballPosition.dx = 2 + Math.random() * 3; // Randomize ball speed
-        balls++;
-        updateScoreboard();
-        checkOut();
+function simulateMatch(type) {
+  const overs = type === "ODI" ? 50 : type === "T20" ? 20 : 90;
+  let totalRuns = 0;
+  let balls = overs * 6;
+  for (let i = 0; i < balls; i++) {
+    let runChance = Math.random();
+    if (type === "TEST") {
+      totalRuns += runChance < 0.3 ? 0 : runChance < 0.7 ? 1 : runChance < 0.9 ? 2 : 4;
+    } else {
+      totalRuns += runChance < 0.25 ? 0 : runChance < 0.6 ? 1 : runChance < 0.8 ? 2 : runChance < 0.95 ? 4 : 6;
     }
-
-    ballPosition.x += ballPosition.dx;
-    ballPosition.y += ballPosition.dy;
+  }
+  document.getElementById("match-result").textContent = `${type} Score: ${selectedTeam} scored ${totalRuns} runs in ${overs} overs.`;
 }
 
-// Check if the batter is out
-function checkOut() {
-    if (ballPosition.x >= 230 && ballPosition.x <= 270 && ballPosition.y >= 220) {
-        let runs = Math.floor(Math.random() * 7); // Random runs (0 to 6)
-        score += runs;
-
-        if (runs === 0) {
-            wickets++;
-            if (wickets === 3 || balls === 6) {
-                endGame();
-            }
-        }
-    }
+function resetApp() {
+  selectedTeam = "";
+  customizedPlayers = [];
+  document.getElementById("team-form").innerHTML = "";
+  document.getElementById("match-result").textContent = "";
+  toggleScreen("home");
 }
 
-// Update the scoreboard
-function updateScoreboard() {
-    scoreboard.innerHTML = `Score: ${score} | Balls: ${balls} | Wickets: ${wickets}`;
+function goHome() {
+  toggleScreen("home");
 }
 
-// End the game
-function endGame() {
-    gameMessage.innerHTML = `Game Over! Final Score: ${score}`;
-    message.style.display = 'block';
-    hitBtn.disabled = true;
-    resetBtn.classList.remove('hidden');
+function toggleScreen(screenId) {
+  document.querySelectorAll(".screen").forEach(div => div.classList.remove("active"));
+  document.getElementById(screenId).classList.add("active");
 }
 
-// Reset the game
-resetBtn.addEventListener('click', () => {
-    score = 0;
-    balls = 0;
-    wickets = 0;
-    ballPosition.x = 0;
-    ballPosition.y = 150;
-    ballPosition.dx = 2;
-    hitBtn.disabled = false;
-    message.style.display = 'none';
-    resetBtn.classList.add('hidden');
-    updateScoreboard();
-    gameLoop();
-});
-
-// Batting action on hitting the ball
-hitBtn.addEventListener('click', () => {
-    bowlBall();
-    ballPosition.x = 0;
-    ballPosition.y = Math.random() * 200 + 50;
-    ballPosition.dx = 2 + Math.random() * 3;
-});
-
-// Game loop
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawField();
-    drawBatter();
-    drawBall();
-    bowlBall();
-
-    if (wickets < 3 && balls < 6) {
-        requestAnimationFrame(gameLoop);
-    }
-}
-
-gameLoop();
+// Initialize home screen
+toggleScreen("home");
