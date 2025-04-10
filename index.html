@@ -1,37 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Cricket Simulator</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cricket Simulation App</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="game-container">
-        <canvas id="cricketCanvas"></canvas>
-        <div class="controls">
-            <button id="startBtn">Start Game</button>
-            <button id="batBtn" class="hidden">Bat</button>
-            <button id="bowlBtn" class="hidden">Bowl</button>
-            <button id="hitBtn" class="hidden">Hit!</button>
-            <p id="gameStatus">Select your role to start!</p>
-            <div id="scoreboard">
-                <p>Score: <span id="score">0</span></p>
-                <p>Wickets: <span id="wickets">0</span></p>
-                <p>Balls: <span id="balls">0</span></p>
-                <p>Overs: <span id="overs">0</span></p>
-            </div>
-        </div>
-        <canvas id="gameCanvas"></canvas>
-        <div class="controls">
-            <button id="hitBtn">Hit</button>
-            <button id="resetBtn" class="hidden">Reset Game</button>
-        </div>
-        <div id="message" class="hidden">
-            <p id="gameMessage">You're out! Game Over!</p>
-        </div>
-    </div>
+  <div id="home" class="screen">
+    <h1>Cricket Simulation</h1>
+    <button onclick="goToTeamSelection()">Start Simulation</button>
+  </div>
 
-    <script src="script.js"></script>
+  <div id="team-selection" class="screen hidden">
+    <h2>Select Your Team</h2>
+    <select id="team-select"></select>
+    <button onclick="customizeTeam()">Customize Team</button>
+    <button onclick="goHome()">Back to Home</button>
+  </div>
+
+  <div id="customize-team" class="screen hidden">
+    <h2>Customize Players</h2>
+    <form id="team-form"></form>
+    <button onclick="startSimulation()">Start Match</button>
+    <button onclick="goToTeamSelection()">Back</button>
+  </div>
+
+  <div id="match-screen" class="screen hidden">
+    <h2 id="match-title"></h2>
+    <div id="match-type-buttons">
+      <button onclick="simulateMatch('ODI')">ODI</button>
+      <button onclick="simulateMatch('T20')">T20</button>
+      <button onclick="simulateMatch('TEST')">Test</button>
+    </div>
+    <div id="match-result"></div>
+    <button onclick="resetApp()">Reset</button>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
